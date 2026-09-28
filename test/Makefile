@@ -1,36 +1,39 @@
 CC := g++
-CFLAGS := -std=c++17 -lgtest -lpthread
+CFLAGS := -std=c++17 -O2 -g
+LDLIBS := -lgtest -lpthread -lm -ldl
 
-SOURCES := $(wildcard *.cpp)
+SOURCES := $(wildcard *_test.cpp)
 OBJECTS := $(SOURCES:.cpp=.o)
 EXECUTABLES := $(SOURCES:.cpp=.out)
-LIB := ../lib/libabc.a ../lib/aiger.o
-LINK := -lm -ldl -lreadline -ltinfo
+
+LIB := ../lib/libabc.a ../lib/aiger.o ../lib/libcadical.a
 obj_dir = ../obj
 src_dir = ../src
-obj = $(wildcard $(obj_dir)/*.o)
-obj := $(filter-out ../obj/main.o, $(obj))
 header = $(wildcard $(src_dir)/*.h)
+# Project objects, without the program entry point.
+obj = $(filter-out $(obj_dir)/main.o, $(wildcard $(obj_dir)/*.o))
 
-all: $(EXECUTABLES)
+.PHONY: all run preBuild cleanOutput clean
 
-%.out: %.o preBuild
-	$(CC) -o $@ $(patsubst %.out, %.o, $@) $(obj) $(LIB) $(CFLAGS) $(LINK)
-	./$@
+# Build every test binary and run it.
+all: preBuild
+	$(MAKE) run
 
-$(EXECUTABLES): $(OBJECTS) preBuild
-	$(CC) -o $@ $(patsubst %.out, %.o, $@) $(obj) $(LIB) $(CFLAGS) $(LINK)
-	./$@
+run: $(EXECUTABLES)
+	for t in $(EXECUTABLES); do ./$$t || exit 1; done
 	$(MAKE) cleanOutput
 
+%.out: %.o
+	$(CC) -o $@ $< $(obj) $(LIB) $(LDLIBS)
 
-%.o : %.cpp $(header)
-	$(CC) -c $@ $< $(CFLAGS)
+%.o: %.cpp $(header)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 preBuild:
-	make -C "../" test
+	$(MAKE) -C .. objs
 
 cleanOutput:
 	rm -f abcToolAIG.aag abcToolAIG.aig
+
 clean:
 	rm -f *.o *.out
