@@ -4,7 +4,6 @@ main
 lib/*.a
 lib/*.o
 lib/*/*.o
-lib/SATsolver/build/build.h
 abc-2c1c83f
 abc.rc
 trace.cnf

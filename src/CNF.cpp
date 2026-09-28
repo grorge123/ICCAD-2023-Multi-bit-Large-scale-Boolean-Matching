@@ -3,7 +3,6 @@
 //
 #include <sstream>
 #include "CNF.h"
-#include "satsolver.h"
 #include "aigtocnf.h"
 #include "utility.h"
 void CNF::readFromAIG(AIG &aig) {
@@ -106,31 +105,6 @@ void CNF::combine(const CNF &a) {
     maxIdx += a.maxIdx;
 }
 
-//bool CNF::solve() {
-//    //TODO finish checkSatisfied;
-//    if(!change){
-//        return satisfiable;
-//    }else{
-//        string fileName = "CNFSatisfied.cnf";
-//        string content = getRaw();
-//        ofstream ofs;
-//        ofs.open(fileName);
-//        ofs << content;
-//        ofs.close();
-//        char * miterCNF = new char[fileName.size() + 1];
-//        strcpy(miterCNF, fileName.c_str());
-//        solverResult result = SAT_solver(miterCNF);
-//        satisfiable = result.satisfiable;
-//        if(satisfiable){
-//            for(int i = 0 ; i < result.inputSize ; i++){
-//                satisfiedInput.push_back((result.input[i] > 0 ? 1 : 0) ^ inv[i]);
-//            }
-//            free(result.input);
-//        }
-//        change = 0;
-//        return satisfiable;
-//    }
-//}
 bool CNF::solve() {
     //TODO need optimize
     if(change == 0){

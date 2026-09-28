@@ -5,7 +5,7 @@ CFLAGS := -std=c++17 -O3 -Wall -Wextra -g
 SANITIZE := -fsanitize=undefined -fsanitize=address
 DEFINE := -DINF -DDBG
 LINK := -lm -ldl -lreadline -ltinfo
-LIB := lib/libabc.a lib/libkissat.a lib/aiger.o lib/libcadical.a
+LIB := lib/libabc.a lib/aiger.o lib/libcadical.a
 #INCLUDES :=
 
 src_dir = ./src
@@ -28,10 +28,6 @@ lib/libabc.a:
 	$(MAKE) -j -C "lib/abc/" libabc.a ABC_USE_NO_PTHREADS=1 ABC_USE_NO_READLINE=1
 	mv lib/abc/libabc.a lib/
 
-lib/libkissat.a:
-	$(MAKE) -j -C "lib/SATsolver/build" libkissat.a
-	mv lib/SATsolver/build/libkissat.a lib/
-	$(MAKE) -C "lib/SATsolver/build" clean
 
 lib/aiger.o:
 	gcc -c lib/aiger/aiger.c -o lib/aiger.o

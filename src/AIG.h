@@ -5,7 +5,6 @@
 #ifndef MULTI_BIT_LARGE_SCALE_BOOLEAN_MATCHING_AIG_H
 #define MULTI_BIT_LARGE_SCALE_BOOLEAN_MATCHING_AIG_H
 #include "aiger.h"
-#include "satsolver.h"
 #include <cstring>
 #include <map>
 #include <unordered_map>

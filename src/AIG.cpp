@@ -1229,7 +1229,4 @@ void solveMiter(AIG &cir1, AIG &cir2, CNF &miter, AIG &miterAIG) {
     miterAIG = AIG("miter.aig");
     miter = CNF(miterAIG);
     miter.solve();
-//    solverResult result = SAT_solver(miterCNF);
-//
-//    return result;
 }

@@ -4,7 +4,7 @@ CFLAGS := -std=c++17 -lgtest -lpthread
 SOURCES := $(wildcard *.cpp)
 OBJECTS := $(SOURCES:.cpp=.o)
 EXECUTABLES := $(SOURCES:.cpp=.out)
-LIB := ../lib/libabc.a ../lib/libkissat.a ../lib/aiger.o
+LIB := ../lib/libabc.a ../lib/aiger.o
 LINK := -lm -ldl -lreadline -ltinfo
 obj_dir = ../obj
 src_dir = ../src
