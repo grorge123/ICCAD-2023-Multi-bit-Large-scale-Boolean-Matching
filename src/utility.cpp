@@ -76,19 +76,19 @@ bool exeAbcCmd(const string &abcCmd, const string &fromFun, const string& keywor
     stdout = fopen(resultPath.c_str(), "a");
     if (stdout != nullptr) {
         if (Cmd_CommandExecute(pAbc, abcCmd.c_str())){
-#ifdef DBG
+            fflush(stdout);
+            fclose(stdout);
+            stdout = saveStdout;
             cout << "[" << fromFun << "] ERROR:Cannot execute command \"" << abcCmd << "\".\n";
             exit(1);
-#endif
         }
         fflush(stdout);
         fclose(stdout);
         stdout = saveStdout;
     } else {
-#ifdef DBG
+        stdout = saveStdout;
         cout << "[" << fromFun << "] ERROR:Can't write file:" << resultPath << endl;
         exit(1);
-#endif
     }
     if(!keyword.empty()){
         bool find = false;

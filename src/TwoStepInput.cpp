@@ -21,7 +21,7 @@ static int ceil_log2(unsigned long long x)
 
     int y = (((x & (x - 1)) == 0) ? 0 : 1);
     int j = 32;
-    int i;
+    int i = 0;
 
     for (i = 0; i < 6; i++) {
         int k = (((x & t[i]) == 0) ? 0 : j);

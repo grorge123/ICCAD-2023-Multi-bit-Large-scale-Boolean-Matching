@@ -10,12 +10,10 @@ extern LargeScale lg;
 int main (int argc, char *argv[]){
     Abc_Start();
     pAbc = Abc_FrameGetGlobalFrame();
-#ifdef DBG
     if(argc != 3){
         cout << "[main] ERROR: wrong argument number!\n";
         exit(1);
     }
-#endif
     InputStructure input = parseInput(argv[1]);
 //    lg = LargeScale(input, argv[2], 1);
 //    int lgMatch = lg.start();
