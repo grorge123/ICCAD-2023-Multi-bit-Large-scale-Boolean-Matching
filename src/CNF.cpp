@@ -56,11 +56,11 @@ void CNF::readFromFile(const string& inputPath) {
             ss >> input; // read p
             ss >> input; // read cnf
             ss >> maxIdx;
-            int clauseNum;
+            int clauseNum = 0;
             ss >> clauseNum;
         }else{
             vector<int> ve;
-            int now;
+            int now = 0;
             while (ss >> now){
                 if(now == 0) break;
                 ve.push_back(now);

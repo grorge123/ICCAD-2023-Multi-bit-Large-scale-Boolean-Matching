@@ -26,7 +26,7 @@ void AIG::parseRaw() {
 #endif
     tree.resize(MAXIndex+1);
     for(int i = 0 ; i < inputNum ; i++){
-        int inpNum;
+        int inpNum = 0;
         ss >> inpNum;
         tree[inpNum / 2].isInput = true;
         indexMap.push_back(inpNum / 2);
@@ -35,7 +35,7 @@ void AIG::parseRaw() {
         tree[inpNum / 2].exist = true;
     }
     for(int i = 0 ; i < outputNum ; i++){
-        int outNum;
+        int outNum = 0;
         ss >> outNum;
 
         indexMap.push_back(outNum / 2);
@@ -45,7 +45,7 @@ void AIG::parseRaw() {
         tree[outNum / 2].exist = true;
     }
     for(int i = 0 ; i < andNum ; i++){
-        int out, l, r;
+        int out = 0, l = 0, r = 0;
         ss >> out >> l >> r;
         int idx = out / 2;
         tree[idx].l = l / 2;
@@ -918,17 +918,26 @@ void AIG::writeToAIGFile(const string &fileName) {
     aiger *aig = aiger_init();
     FILE *fp = nullptr;
     fp = fopen(aagFileName.c_str(), "w+");
+    if(fp == nullptr){
+        cout << "[AIG:writeToAIGFile]ERROR: can not write file:" << aagFileName << endl;
+        exit(1);
+    }
     fputs(getRaw().c_str(), fp);
     fclose(fp);
     const char *err_msg = aiger_open_and_read_from_file(aig, aagFileName.c_str());
-#ifdef DBG
     if(err_msg != nullptr){
         cout << "[AIG:writeToAIGFile]ERROR: file:" << fileName << " msg:" << err_msg << endl;
         exit(1);
     }
-#endif
     fp = fopen(fileName.c_str(), "w");
-    aiger_write_to_file(aig, aiger_binary_mode, fp);
+    if(fp == nullptr){
+        cout << "[AIG:writeToAIGFile]ERROR: can not write file:" << fileName << endl;
+        exit(1);
+    }
+    if(!aiger_write_to_file(aig, aiger_binary_mode, fp)){
+        cout << "[AIG:writeToAIGFile]ERROR: can not write AIG to file:" << fileName << endl;
+        exit(1);
+    }
     fclose(fp);
     aiger_reset(aig);
 }
@@ -936,28 +945,27 @@ void AIG::writeToAIGFile(const string &fileName) {
 void AIG::readFromAIGFile(const string &fileName) {
     aiger *input = aiger_init();
     const char *err_msg = aiger_open_and_read_from_file(input, fileName.c_str());
-#ifdef DBG
     if(err_msg != nullptr){
         cout << "[AIG]ERROR: " << err_msg << endl;
         exit(1);
     }
-#endif
     ifstream ifs;
     ifs.open (fileName.c_str(), ios::binary );
     ifs.seekg (0, ios::end);
-    int length = ifs.tellg();
+    long long length = ifs.tellg();
+    if(length < 0){
+        cout << "[AIG]ERROR: can not read file:" << fileName << endl;
+        exit(1);
+    }
     length = length * 8 + 1000;
-    char* tmp = (char*)malloc(sizeof(char ) * length);
+    vector<char> tmp(length);
     aiger_mode mode = aiger_ascii_mode;
-    int err = aiger_write_to_string(input, mode, tmp, length);
-#ifdef DBG
+    int err = aiger_write_to_string(input, mode, tmp.data(), tmp.size());
     if(err != 1){
         cout << "[AIG]ERROR: AIG write error" << endl;
         exit(1);
     }
-#endif
-    raw = tmp;
-    free(tmp);
+    raw = tmp.data();
     ifs.close();
     aiger_reset(input);
     parseRaw();

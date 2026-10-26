@@ -8,6 +8,11 @@ FILE * ABCTool::stdoutSave(){
     FILE *saveStdout = stdout;
     string resultPath = "stdoutOutput.txt";
     stdout = fopen(resultPath.c_str(), "w");
+    if(stdout == nullptr){
+        stdout = saveStdout;
+        cout << "[abcTool]ERROR: can not write file:" << resultPath << endl;
+        exit(1);
+    }
     return saveStdout;
 }
 void ABCTool::stdoutRecovery(FILE *saveStdout) {
@@ -17,16 +22,15 @@ void ABCTool::stdoutRecovery(FILE *saveStdout) {
 }
 
 void ABCTool::init(string &path){
-    char ** argv = new char *[2];
-    char * pathArr = new char[path.size() + 1];
-    strcpy(pathArr, path.c_str());
-    argv[1] = pathArr;
+    // ABC copies the file name, so the buffers only need to outlive the call.
+    char cmdName[] = "read_aiger";
+    vector<char> pathArr(path.begin(), path.end());
+    pathArr.push_back('\0');
+    char * argv[] = {cmdName, pathArr.data()};
     FILE * saveStdout = stdoutSave();
     IoCommandReadAiger(pAbc, 2, argv);
     stdoutRecovery(saveStdout);
     mainNtk = Abc_FrameReadNtk(pAbc);
-    delete[] argv;
-    delete[] pathArr;
 }
 
 void ABCTool::init(AIG &cir) {
@@ -40,32 +44,39 @@ void ABCTool::init(AIG &cir) {
         aiger *aig = aiger_init();
         FILE *fp = nullptr;
         fp = fopen(filename.c_str(), "w+");
+        if(fp == nullptr){
+            cout << "[abcTool]ERROR: can not write file:" << filename << endl;
+            exit(1);
+        }
         fputs(content.c_str(), fp);
         fclose(fp);
         const char *err_msg = aiger_open_and_read_from_file(aig, filename.c_str());
-#ifdef DBG
         if(err_msg != nullptr){
-                cout << "[abcTool]ERROR: " << err_msg << endl;
-                exit(1);
-            }
-#endif
+            cout << "[abcTool]ERROR: " << err_msg << endl;
+            exit(1);
+        }
         fp = fopen(filename2.c_str(), "w");
-        aiger_write_to_file(aig, aiger_binary_mode, fp);
+        if(fp == nullptr){
+            cout << "[abcTool]ERROR: can not write file:" << filename2 << endl;
+            exit(1);
+        }
+        if(!aiger_write_to_file(aig, aiger_binary_mode, fp)){
+            cout << "[abcTool]ERROR: can not write AIG to file:" << filename2 << endl;
+            exit(1);
+        }
         fclose(fp);
         aiger_reset(aig);
         init(filename2);
     } else {
-#ifdef DBG
         cout << "[abcTool] Error: cant not open file." << endl;
-            exit(1);
-#endif
+        exit(1);
     }
 }
 
 unordered_map<string, set<string>> ABCTool::funSupport(){
-    Abc_Obj_t * pNode, * pNodeCi;
+    Abc_Obj_t * pNode = nullptr, * pNodeCi = nullptr;
     unordered_map<string, set<string> > re;
-    int i, v;
+    int i = 0, v = 0;
     FILE * saveStdout = stdoutSave();
     Vec_Ptr_t * vSuppFun = Sim_ComputeFunSupp( mainNtk, 0 );
     stdoutRecovery(saveStdout);
@@ -84,9 +95,9 @@ unordered_map<string, set<string>> ABCTool::funSupport(){
 }
 
 unordered_map<string, set<string>> ABCTool::strSupport() {
-    Abc_Obj_t * pNode, * pNodeCi;
+    Abc_Obj_t * pNode = nullptr, * pNodeCi = nullptr;
     unordered_map<string, set<string> > re;
-    int i, v;
+    int i = 0, v = 0;
     FILE * saveStdout = stdoutSave();
     Vec_Ptr_t * vSuppStr = Sim_ComputeStrSupp( mainNtk );
     stdoutRecovery(saveStdout);
@@ -113,12 +124,12 @@ static inline Vec_Int_t * Vec_VecEntryIntCopy( Vec_Vec_t * p, int i )
     return (Vec_Int_t *)p->pArray[i];
 }
 unordered_map<string, vector<pair<string, string>>> ABCTool::calSymmetry() {
-    Abc_Obj_t * pNode;
+    Abc_Obj_t * pNode = nullptr;
     unordered_map<string, vector<pair<string, string>>> re;
     FILE * saveStdout = stdoutSave();
     Sym_Man_t *p = Sim_ComputeTwoVarSymms2(mainNtk, 0);
     vector<string> nameMap(p->nOutputs);
-    int d;
+    int d = 0;
     Abc_NtkForEachCo( mainNtk, pNode, d ){
         nameMap[d] = Abc_ObjName(pNode);
     }
@@ -131,14 +142,14 @@ unordered_map<string, vector<pair<string, string>>> ABCTool::calSymmetry() {
 }
 
 vector<pair<string, string>> ABCTool::calSymmetryPair(Extra_BitMat_t *pMat, Vec_Int_t *vSupport, Sym_Man_t *p) {
-    Abc_Obj_t * pNodeCi;
-    int v;
+    Abc_Obj_t * pNodeCi = nullptr;
+    int v = 0;
     vector<string> nameMap(p->nInputs);
     Abc_NtkForEachCi( mainNtk, pNodeCi, v ){
         nameMap[v] = Abc_ObjName(pNodeCi);
     }
     vector<pair<string, string>> re;
-    int i, k, Index1, Index2;
+    int i = 0, k = 0, Index1 = 0, Index2 = 0;
     Vec_IntForEachEntry( vSupport, i, Index1 )
     Vec_IntForEachEntryStart( vSupport, k, Index2, Index1+1 )
         if ( Extra_BitMatrixLookup1( pMat, i, k ) ){

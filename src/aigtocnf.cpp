@@ -1,3 +1,5 @@
+#include <vector>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -51,11 +53,11 @@ die (const char *fmt, ...)
 }
 
 int _aigtocnf (int argc, char **argv){
-    const char *input_name, *output_name, *error;
-    int res, * map, m, n, close_file, pg, prtmap;
-    unsigned i, * refs, lit;
-    aiger *aiger;
-    FILE *file;
+    const char *input_name = nullptr, *output_name = nullptr, *error = nullptr;
+    int res = 0, * map = nullptr, m = 0, n = 0, close_file = 0, pg = 0, prtmap = 0;
+    unsigned i = 0, * refs = nullptr, lit = 0;
+    aiger *aiger = nullptr;
+    FILE *file = nullptr;
 
     pg = 1;
     prtmap = 0;
@@ -231,16 +233,12 @@ int _aigtocnf (int argc, char **argv){
 
 void aigtocnf(const char *fileName, const char *outputName){
     int argc = 4;
-    char* argv[4];
+    char cmdName[] = "aigtocnf";
     char arg[] = "-m";
-    argv[1] = (char*)malloc(sizeof(char) * strlen(fileName) + 1);
-    strcpy(argv[1], fileName);
-    argv[2] = (char*)malloc(sizeof(char) * strlen(outputName) + 1);
-    strcpy(argv[2], outputName);
-    argv[3] = arg;
+    std::vector<char> input(fileName, fileName + strlen(fileName) + 1);
+    std::vector<char> output(outputName, outputName + strlen(outputName) + 1);
+    char* argv[4] = {cmdName, input.data(), output.data(), arg};
     _aigtocnf(argc, argv);
-    free(argv[1]);
-    free(argv[2]);
 }
 
 #ifdef __cplusplus

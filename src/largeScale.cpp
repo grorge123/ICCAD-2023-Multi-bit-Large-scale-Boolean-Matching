@@ -106,7 +106,7 @@ int LargeScale::start() {
     cir2.initialRefinement(initialInputRecord2, initialOutputRecord2);
     dealRecord(initialInputRecord1, initialInputRecord2, true);
     dealRecord(initialOutputRecord1, initialOutputRecord2, false);
-    int change;
+    int change = 0;
     do{
         vector<vector<set<size_t> > > dependencyInputRecord1, dependencyOutputRecord1;
         vector<vector<set<size_t> > > dependencyInputRecord2, dependencyOutputRecord2;
@@ -207,7 +207,7 @@ LargeScale::removeNonSingleton(const vector<vector<string>> &par1, const vector<
 }
 
 void LargeScale::removeNonSupport(vector<pair<string, string>> &inputMatch, vector<pair<string, string>> &outputMatch) {
-    int change;
+    int change = 0;
     set<string> inputMap1, outputMap1;
     set<string> inputMap2, outputMap2;
     for(auto &match: inputMatch){
@@ -298,7 +298,7 @@ void LargeScale::SAT_Solver(vector<pair<string, string> > &inputMatch, vector<pa
         map<int, string> CNFToAIG;
         while (pf >> symbol){
             if(symbol != "c")break;
-            int AIGIdx, CNFIdx;
+            int AIGIdx = 0, CNFIdx = 0;
             string tmp;
             pf >> AIGIdx >> tmp >> CNFIdx;
             //TODO deal AIGIdx == 0 or 1 and new output format
