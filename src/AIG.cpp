@@ -958,14 +958,17 @@ void AIG::readFromAIGFile(const string &fileName) {
         exit(1);
     }
     length = length * 8 + 1000;
-    vector<char> tmp(length);
-    aiger_mode mode = aiger_ascii_mode;
-    int err = aiger_write_to_string(input, mode, tmp.data(), tmp.size());
-    if(err != 1){
-        cout << "[AIG]ERROR: AIG write error" << endl;
-        exit(1);
+    {
+        // Free the serialization buffer before parseRaw() runs.
+        vector<char> tmp(length);
+        aiger_mode mode = aiger_ascii_mode;
+        int err = aiger_write_to_string(input, mode, tmp.data(), tmp.size());
+        if(err != 1){
+            cout << "[AIG]ERROR: AIG write error" << endl;
+            exit(1);
+        }
+        raw = tmp.data();
     }
-    raw = tmp.data();
     ifs.close();
     aiger_reset(input);
     parseRaw();
